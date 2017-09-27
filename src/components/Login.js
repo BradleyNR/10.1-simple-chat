@@ -16,7 +16,9 @@ class Form extends Component {
       username: '',
       password: '',
       singupUsername: '',
-      signupPassword: ''
+      signupPassword: '',
+      user: null,
+      errorMessage: ''
     };
   }
 
@@ -49,19 +51,28 @@ class Form extends Component {
     var password = this.state.password;
     let qs = 'username=' + encodeURIComponent(username) + '&password=' + password;
 
-    fetch(PARSE_URL + '/?' + qs, {
+    fetch(PARSE_URL + '/login?' + qs, {
       headers: HEADERS
     }).then((resp) => {
-      return resp.json()
+      console.log(resp);
+      return resp.json();
     }).then((user) => {
-      localStorage.setItem('user', JSON.stringify(user));
-      //setting session token to header for new headers
-      HEADERS['X-Parse-Session-Token'] = user.sessionToken;
-      console.log(user);
+      console.log('user: ', user);
 
-      this.setState({user: user});
+      localStorage.setItem('user', JSON.stringify(user));
+
+      // --- if trying to log in with wrong user/pass
+      // --- don't set session or set state
+      if (user.username) {
+        // --- setting session token to header for new headers
+        HEADERS['X-Parse-Session-Token'] = user.sessionToken;
+        this.setState({user: user});
+      } else {
+        this.setState({errorMessage: user.error})
+      }
     });
   }
+
 
   handleSignupSubmit = (e) => {
     e.preventDefault();
@@ -78,7 +89,6 @@ class Form extends Component {
     }).then((user) => {
       localStorage.setItem('user', JSON.stringify(user));
       HEADERS['X-Parse-Session-Token'] = user.sessionToken;
-
       this.setState({user: user})
     });
   }
@@ -87,7 +97,9 @@ class Form extends Component {
     return(
       <div className='row'>
 
-        {this.state.user ? <h1>{this.state.user}</h1> : null}
+
+          {this.state.user ? <h1 className='col-md-11 col-md-offset-1'>Welcome, {this.state.user.username}!</h1> : <h1 className='col-md-11 col-md-offset-1'>{this.state.errorMessage}</h1>}
+
 
           <div className='col-md-5 col-md-offset-1'>
             <h1>Please Login:</h1>
