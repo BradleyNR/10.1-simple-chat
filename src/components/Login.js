@@ -17,9 +17,21 @@ class Form extends Component {
       password: '',
       singupUsername: '',
       signupPassword: '',
-      user: null,
-      errorMessage: ''
+      errorMessage: '',
+      newMessage: '',
+      user: null
     };
+
+  }
+
+  // --- Below sets the session per localStorage so a user can stay
+  // --- logged in as long as they like across requests
+  componentWillMount(){
+    var loggedInUser = localStorage.getItem('user');
+
+    if(loggedInUser){
+      this.setState({user: JSON.parse(loggedInUser)})
+    }
   }
 
   handleSignupUsername = (e) => {
@@ -71,6 +83,31 @@ class Form extends Component {
         this.setState({errorMessage: user.error})
       }
     });
+  }
+
+  handleMessage = (e) => {
+    e.preventDefault();
+
+    let messageText = this.state.newMessage;
+    let objId = this.state.user.objectId;
+    console.log('obj id', objId);
+
+    fetch(PARSE_URL + '/classes/message', {
+      headers: HEADERS,
+      body: JSON.stringify({messagetext: messageText, user: objId}),
+      method: 'POST'
+    }).then((resp) => {
+      return resp.json();
+    }).then((message) => {
+      console.log(message);
+    });
+  }
+
+  handleMessageText = (e) => {
+    e.preventDefault();
+
+    this.setState({newMessage: e.target.value})
+    console.log(this.state.newMessage);
   }
 
 
@@ -131,6 +168,19 @@ class Form extends Component {
             </form>
 
           </div>
+
+          {this.state.user ?
+            <div className='col-md-10 col-md-offset-1'>
+
+              <form onSubmit={this.handleMessage}>
+                <div className='form-group'>
+                  <label htmlFor='message-box'>Enter Message:</label>
+                  <input onChange={this.handleMessageText} id='message-box' className='form-control' placeholder='Type your message...'></input>
+                </div>
+              </form>
+            </div> : null
+          }
+
         </div>
     )
   }
