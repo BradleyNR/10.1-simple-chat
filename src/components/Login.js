@@ -144,7 +144,7 @@ class Form extends Component {
     }).then((user) => {
       localStorage.setItem('user', JSON.stringify(user));
       HEADERS['X-Parse-Session-Token'] = user.sessionToken;
-      this.setState({user: user, username: '', password: '', signupUsername: '', signupPassword: ''})
+      this.setState({username: '', password: '', signupUsername: '', signupPassword: ''})
     });
   }
 
