@@ -164,48 +164,47 @@ class Form extends Component {
 
           {this.state.user ? <h1 className='col-md-11 col-md-offset-1'>Welcome { this.state.user.username }!</h1> : <h1 className='col-md-11 col-md-offset-1'>{this.state.errorMessage}</h1>}
 
+            <div className='col-md-5 col-md-offset-1'>
+              <h1>Please Login:</h1>
+              <form onSubmit={this.handleSubmit}>
+                <div className="form-group">
+                  <label htmlFor="username">Username:</label>
+                  <input onChange={this.handleUsername} type="text" className="form-control" id="username" placeholder="Username" value={this.state.username}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="password">Password:</label>
+                  <input onChange={this.handlePassword} type="password" className="form-control" id="password" placeholder="Password" value={this.state.password}/>
+                </div>
+                <button type="submit" className="btn btn-success">Submit</button>
+              </form>
+            </div>
 
-          <div className='col-md-5 col-md-offset-1'>
-            <h1>Please Login:</h1>
-            <form onSubmit={this.handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="username">Username:</label>
-                <input onChange={this.handleUsername} type="text" className="form-control" id="username" placeholder="Username" value={this.state.username}/>
-              </div>
-              <div className="form-group">
-                <label htmlFor="password">Password:</label>
-                <input onChange={this.handlePassword} type="password" className="form-control" id="password" placeholder="Password" value={this.state.password}/>
-              </div>
-              <button type="submit" className="btn btn-success">Submit</button>
-            </form>
-          </div>
+            <div className='col-md-5'>
+              <h1>No Account? Please sign up:</h1>
+              <form onSubmit={this.handleSignupSubmit}>
+                <div className="form-group">
+                  <label htmlFor="signupUsername">Username:</label>
+                  <input onChange={this.handleSignupUsername} type="text" className="form-control" id="signupUsername" placeholder="Username" value={this.state.signupUsername}/>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="signupPassword">Password:</label>
+                  <input onChange={this.handleSignupPassword} type="password" className="form-control" id="signupPassword" placeholder="Password" value={this.state.signupPassword}/>
+                </div>
+                <button type="submit" className="btn btn-success">Submit</button>
+              </form>
 
-          <div className='col-md-5'>
-            <h1>No Account? Please sign up:</h1>
-            <form onSubmit={this.handleSignupSubmit}>
-              <div className="form-group">
-                <label htmlFor="signupUsername">Username:</label>
-                <input onChange={this.handleSignupUsername} type="text" className="form-control" id="signupUsername" placeholder="Username" value={this.state.signupUsername}/>
-              </div>
-              <div className="form-group">
-                <label htmlFor="signupPassword">Password:</label>
-                <input onChange={this.handleSignupPassword} type="password" className="form-control" id="signupPassword" placeholder="Password" value={this.state.signupPassword}/>
-              </div>
-              <button type="submit" className="btn btn-success">Submit</button>
-            </form>
-
-          </div>
+            </div>
 
           {this.state.user ?
             <div className='col-md-10 col-md-offset-1 messages-and-chatbar'>
 
-              <div>
+              <div className='text-area'>
                 {showMessages}
               </div>
 
               <form onSubmit={this.handleMessage}>
                 <div className='form-group'>
-                  <label htmlFor='message-box'>Enter Message:</label>
+                  <label htmlFor='message-box' className='enter-message'>Enter Message:</label>
                   <input onChange={this.handleMessageText} id='message-box' className='form-control' placeholder='Type your message...' value={this.state.newMessage}></input>
                 </div>
               </form>
