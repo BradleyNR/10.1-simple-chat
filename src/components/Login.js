@@ -19,7 +19,8 @@ class Form extends Component {
       signupPassword: '',
       errorMessage: '',
       newMessage: '',
-      user: null
+      user: null,
+      messageList: []
     };
 
   }
@@ -32,6 +33,15 @@ class Form extends Component {
     if(loggedInUser){
       this.setState({user: JSON.parse(loggedInUser)})
     }
+
+    fetch(PARSE_URL + '/classes/message', {
+      headers: HEADERS
+    }).then((resp) => {
+      return resp.json();
+    }).then((data) => {
+      console.log('data getting at start ', data);
+      this.setState({messageList: data.results})
+    });
   }
 
   handleSignupUsername = (e) => {
@@ -78,7 +88,7 @@ class Form extends Component {
       if (user.username) {
         // --- setting session token to header for new headers
         HEADERS['X-Parse-Session-Token'] = user.sessionToken;
-        this.setState({user: user});
+        this.setState({user: user, username: '', password: '', signupUsername: '', signupPassword: ''});
       } else {
         this.setState({errorMessage: user.error})
       }
@@ -92,14 +102,22 @@ class Form extends Component {
     let objId = this.state.user.objectId;
     console.log('obj id', objId);
 
+    // what is going wrong in below? check
     fetch(PARSE_URL + '/classes/message', {
       headers: HEADERS,
-      body: JSON.stringify({messagetext: messageText, user: objId}),
+      body: JSON.stringify({postByUser: this.state.user.username, messagetext: messageText, user: {
+        "__type": "Pointer",
+        "className": "_User",
+        "objectId": objId
+    }}),
       method: 'POST'
     }).then((resp) => {
       return resp.json();
     }).then((message) => {
-      console.log(message);
+      console.log('message posted');
+      let messageArray = this.state.messageList;
+      messageArray.push({messagetext: messageText, postByUser: this.state.user.username});
+      this.setState({messageList: messageArray, newMessage: ''})
     });
   }
 
@@ -126,16 +144,25 @@ class Form extends Component {
     }).then((user) => {
       localStorage.setItem('user', JSON.stringify(user));
       HEADERS['X-Parse-Session-Token'] = user.sessionToken;
-      this.setState({user: user})
+      this.setState({user: user, username: '', password: '', signupUsername: '', signupPassword: ''})
     });
   }
 
+
   render(){
+
+    let showMessages = this.state.messageList.map((message, index) => {
+      console.log(message);
+      return(
+        <p key={index}> {message.postByUser} : {message.messagetext}</p>
+      )
+    })
+
     return(
       <div className='row'>
 
 
-          {this.state.user ? <h1 className='col-md-11 col-md-offset-1'>Welcome, {this.state.user.username}!</h1> : <h1 className='col-md-11 col-md-offset-1'>{this.state.errorMessage}</h1>}
+          {this.state.user ? <h1 className='col-md-11 col-md-offset-1'>Welcome { this.state.user.username }!</h1> : <h1 className='col-md-11 col-md-offset-1'>{this.state.errorMessage}</h1>}
 
 
           <div className='col-md-5 col-md-offset-1'>
@@ -143,11 +170,11 @@ class Form extends Component {
             <form onSubmit={this.handleSubmit}>
               <div className="form-group">
                 <label htmlFor="username">Username:</label>
-                <input onChange={this.handleUsername} type="text" className="form-control" id="username" placeholder="Username" />
+                <input onChange={this.handleUsername} type="text" className="form-control" id="username" placeholder="Username" value={this.state.username}/>
               </div>
               <div className="form-group">
                 <label htmlFor="password">Password:</label>
-                <input onChange={this.handlePassword} type="password" className="form-control" id="password" placeholder="Password" />
+                <input onChange={this.handlePassword} type="password" className="form-control" id="password" placeholder="Password" value={this.state.password}/>
               </div>
               <button type="submit" className="btn btn-success">Submit</button>
             </form>
@@ -158,11 +185,11 @@ class Form extends Component {
             <form onSubmit={this.handleSignupSubmit}>
               <div className="form-group">
                 <label htmlFor="signupUsername">Username:</label>
-                <input onChange={this.handleSignupUsername} type="text" className="form-control" id="signupUsername" placeholder="Username" />
+                <input onChange={this.handleSignupUsername} type="text" className="form-control" id="signupUsername" placeholder="Username" value={this.state.signupUsername}/>
               </div>
               <div className="form-group">
                 <label htmlFor="signupPassword">Password:</label>
-                <input onChange={this.handleSignupPassword} type="password" className="form-control" id="signupPassword" placeholder="Password" />
+                <input onChange={this.handleSignupPassword} type="password" className="form-control" id="signupPassword" placeholder="Password" value={this.state.signupPassword}/>
               </div>
               <button type="submit" className="btn btn-success">Submit</button>
             </form>
@@ -170,16 +197,19 @@ class Form extends Component {
           </div>
 
           {this.state.user ?
-            <div className='col-md-10 col-md-offset-1'>
+            <div className='col-md-10 col-md-offset-1 messages-and-chatbar'>
+
+              <div>
+                {showMessages}
+              </div>
 
               <form onSubmit={this.handleMessage}>
                 <div className='form-group'>
                   <label htmlFor='message-box'>Enter Message:</label>
-                  <input onChange={this.handleMessageText} id='message-box' className='form-control' placeholder='Type your message...'></input>
+                  <input onChange={this.handleMessageText} id='message-box' className='form-control' placeholder='Type your message...' value={this.state.newMessage}></input>
                 </div>
               </form>
-            </div> : null
-          }
+            </div> : null}
 
         </div>
     )
